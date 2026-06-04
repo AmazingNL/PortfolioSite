@@ -1,0 +1,66 @@
+@inject PortfolioDataService Data
+
+<section id="about" class="section about">
+    <div class="about-grid">
+        <div>
+            <p class="eyebrow">About</p>
+            <h2 class="section-title">@Profile.FullName</h2>
+            <p class="headline">@Profile.Headline</p>
+            <p class="bio">@Profile.Bio</p>
+
+            <div class="about-links">
+                @if (!string.IsNullOrWhiteSpace(Profile.GitHubUrl))
+                {
+                    <a class="btn" href="@Profile.GitHubUrl" target="_blank" rel="noopener">GitHub</a>
+                }
+                @if (!string.IsNullOrWhiteSpace(Profile.LinkedInUrl))
+                {
+                    <a class="btn" href="@Profile.LinkedInUrl" target="_blank" rel="noopener">LinkedIn</a>
+                }
+                @if (!string.IsNullOrWhiteSpace(Profile.Email))
+                {
+                    <a class="btn" href="mailto:@Profile.Email">Email</a>
+                }
+            </div>
+        </div>
+
+        <div class="about-aside">
+            @if (!string.IsNullOrWhiteSpace(Profile.AvatarUrl))
+            {
+                <img class="avatar" src="@Profile.AvatarUrl" alt="@Profile.FullName" />
+            }
+            else
+            {
+                <div class="avatar avatar-placeholder">@Initials</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Profile.Location))
+            {
+                <p class="muted location">📍 @Profile.Location</p>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    /// <summary>Falls back to sensible defaults until a profile row exists in Supabase.</summary>
+    private Profile Profile { get; set; } = new()
+    {
+        FullName = "Amazinggrace Iruoma",
+        Headline = "Software Developer",
+        Bio = "I build web applications and love turning ideas into working software. " +
+              "This is my portfolio — once you connect Supabase and add a profile row, " +
+              "this section becomes editable from the admin page.",
+        GitHubUrl = "https://github.com/AmazingNL"
+    };
+
+    private string Initials =>
+        string.Concat(Profile.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2).Select(p => p[0])).ToUpperInvariant();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var loaded = await Data.GetProfileAsync();
+        if (loaded is not null)
+            Profile = loaded;
+    }
+}

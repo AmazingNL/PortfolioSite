@@ -1,0 +1,74 @@
+@inject PortfolioDataService Data
+
+<section id="skills" class="section">
+    <p class="eyebrow">Toolbox</p>
+    <h2 class="section-title">Skills</h2>
+    <p class="section-subtitle">Technologies and tools I work with.</p>
+
+    @if (_loading)
+    {
+        <p class="muted">Loading…</p>
+    }
+    else if (_skills.Count == 0)
+    {
+        <div class="grid">
+            @foreach (var group in _fallback)
+            {
+                <div class="card">
+                    <h3 class="cat">@group.Key</h3>
+                    <div>
+                        @foreach (var name in group.Value)
+                        {
+                            <span class="tag">@name</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!Data.IsConfigured)
+        {
+            <p class="muted hint">Showing sample skills. Connect Supabase and add rows to the <code>skills</code> table to manage these from the admin page.</p>
+        }
+    }
+    else
+    {
+        <div class="grid">
+            @foreach (var group in _skills.GroupBy(s => s.Category))
+            {
+                <div class="card">
+                    <h3 class="cat">@group.Key</h3>
+                    @foreach (var skill in group)
+                    {
+                        <div class="skill-row">
+                            <span>@skill.Name</span>
+                            <span class="meter">
+                                @for (var i = 1; i <= 5; i++)
+                                {
+                                    <span class="pip @(i <= skill.Level ? "on" : "")"></span>
+                                }
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private List<Skill> _skills = new();
+    private bool _loading = true;
+
+    private readonly Dictionary<string, string[]> _fallback = new()
+    {
+        ["Languages"] = new[] { "C#", "JavaScript", "Java", "SQL", "HTML/CSS" },
+        ["Frameworks"] = new[] { "Blazor", ".NET", "ASP.NET Core" },
+        ["Tools & Cloud"] = new[] { "Supabase", "Git", "GitHub", "Visual Studio" },
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _skills = await Data.GetSkillsAsync();
+        _loading = false;
+    }
+}

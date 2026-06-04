@@ -1,0 +1,89 @@
+@inject GitHubService GitHub
+
+<section id="projects" class="section">
+    <p class="eyebrow">Work</p>
+    <h2 class="section-title">Projects</h2>
+    <p class="section-subtitle">Public repositories from GitHub, tagged for the portfolio.</p>
+
+    @if (_loading)
+    {
+        <p class="muted">Loading repositories…</p>
+    }
+    else if (_error is not null)
+    {
+        <div class="notice">Couldn't load repositories: @_error</div>
+    }
+    else if (_repos.Count == 0)
+    {
+        <div class="notice">
+            No repositories tagged <code>portfolio</code> yet. On GitHub, open a repo →
+            the ⚙️ next to <strong>About</strong> → add the topic <strong>portfolio</strong>,
+            and it'll appear here automatically.
+        </div>
+    }
+    else
+    {
+        <div class="grid">
+            @foreach (var repo in _repos)
+            {
+                <article class="card repo-card">
+                    <div class="repo-head">
+                        <h3 class="repo-name">
+                            <a href="@repo.HtmlUrl" target="_blank" rel="noopener">@repo.Name</a>
+                        </h3>
+                    </div>
+                    <p class="repo-desc">@(string.IsNullOrWhiteSpace(repo.Description) ? "No description provided." : repo.Description)</p>
+
+                    @if (repo.Topics is { Count: > 0 })
+                    {
+                        <div class="repo-topics">
+                            @foreach (var t in repo.Topics.Take(5))
+                            {
+                                <span class="tag">@t</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="repo-meta">
+                        @if (!string.IsNullOrEmpty(repo.Language))
+                        {
+                            <span class="meta-item"><span class="dot"></span>@repo.Language</span>
+                        }
+                        <span class="meta-item">★ @repo.StargazersCount</span>
+                        <span class="meta-item">⑂ @repo.ForksCount</span>
+                    </div>
+
+                    <div class="repo-links">
+                        <a class="btn" href="@repo.HtmlUrl" target="_blank" rel="noopener">Code</a>
+                        @if (!string.IsNullOrWhiteSpace(repo.Homepage))
+                        {
+                            <a class="btn btn-primary" href="@repo.Homepage" target="_blank" rel="noopener">Live demo</a>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private List<GitHubRepo> _repos = new();
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _repos = (await GitHub.GetFeaturedReposAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

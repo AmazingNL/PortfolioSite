@@ -1,0 +1,81 @@
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 1.4rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+}
+
+.up-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.up-title {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.up-desc {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+}
+
+.up-date {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--accent);
+}
+
+.status {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: var(--border);
+    color: var(--text);
+}
+
+.status-in-progress {
+    background: rgba(63, 185, 80, 0.15);
+    color: var(--success);
+}
+
+.status-planned {
+    background: rgba(88, 166, 255, 0.15);
+    color: var(--accent);
+}
+
+.status-researching {
+    background: rgba(188, 140, 255, 0.15);
+    color: var(--accent-2);
+}

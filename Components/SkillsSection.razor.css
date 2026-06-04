@@ -1,0 +1,36 @@
+.cat {
+    font-size: 1.05rem;
+    margin: 0 0 1rem;
+    color: var(--accent);
+}
+
+.skill-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.meter {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+}
+
+.pip.on {
+    background: var(--accent);
+}
+
+.hint {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+}

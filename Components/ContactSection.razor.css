@@ -1,0 +1,13 @@
+.contact-form {
+    max-width: 560px;
+}
+
+.success-notice {
+    border-left-color: var(--success);
+    color: var(--text);
+}
+
+.hint {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+}

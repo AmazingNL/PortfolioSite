@@ -1,0 +1,8 @@
+bin/
+obj/
+*.user
+.vs/
+server.log
+
+# Keep appsettings.json — it only holds the PUBLIC Supabase anon key and your
+# GitHub username, both of which are safe to expose in a WebAssembly app.

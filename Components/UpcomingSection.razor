@@ -1,0 +1,59 @@
+@inject PortfolioDataService Data
+
+<section id="upcoming" class="section">
+    <p class="eyebrow">Roadmap</p>
+    <h2 class="section-title">Upcoming Projects</h2>
+    <p class="section-subtitle">What I'm planning and building next.</p>
+
+    @if (_loading)
+    {
+        <p class="muted">Loading…</p>
+    }
+    else if (_projects.Count == 0)
+    {
+        <div class="notice">
+            No upcoming projects listed yet.
+            @if (Data.IsConfigured)
+            {
+                <text>Add some from the <a href="admin">admin page</a>.</text>
+            }
+            else
+            {
+                <text>Connect Supabase to start adding your roadmap.</text>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="timeline">
+            @foreach (var p in _projects)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="card">
+                        <div class="up-head">
+                            <h3 class="up-title">@p.Title</h3>
+                            <span class="status status-@p.Status.ToLowerInvariant().Replace(" ", "-")">@p.Status</span>
+                        </div>
+                        <p class="muted up-desc">@p.Description</p>
+                        @if (!string.IsNullOrWhiteSpace(p.TargetDate))
+                        {
+                            <p class="up-date">🎯 @p.TargetDate</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private List<UpcomingProject> _projects = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _projects = await Data.GetUpcomingProjectsAsync();
+        _loading = false;
+    }
+}

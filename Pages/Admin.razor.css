@@ -1,0 +1,107 @@
+.login-form {
+    max-width: 400px;
+}
+
+.admin-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin: 1.5rem 0 2rem;
+    flex-wrap: wrap;
+}
+
+.tab {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+.editor {
+    max-width: 560px;
+}
+
+.row-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.row-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.inp {
+    flex: 1;
+    padding: 0.55rem 0.7rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.inp.narrow {
+    flex: 0 0 70px;
+}
+
+.editor-card {
+    max-width: 640px;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.row-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.msg {
+    max-width: 640px;
+    margin-bottom: 0.75rem;
+}
+
+.msg-head {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.save-status {
+    margin-top: 1rem;
+    color: var(--success);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 560px) {
+    .row-item {
+        flex-wrap: wrap;
+    }
+}

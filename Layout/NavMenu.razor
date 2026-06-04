@@ -1,0 +1,38 @@
+@implements IDisposable
+@inject NavigationManager Nav
+
+<nav class="topnav">
+    <div class="topnav-inner">
+        <a class="brand" href="/#top">@Brand</a>
+
+        <button class="nav-toggle" @onclick="Toggle" aria-label="Toggle navigation">☰</button>
+
+        <div class="nav-links @(_open ? "open" : "")" @onclick="Close">
+            <a href="/#projects">Projects</a>
+            <a href="/#about">About</a>
+            <a href="/#skills">Skills</a>
+            <a href="/#upcoming">Upcoming</a>
+            <a href="/#contact">Contact</a>
+            <a class="admin-link" href="admin">Admin</a>
+        </div>
+    </div>
+</nav>
+
+@code {
+    [Parameter] public string Brand { get; set; } = "Amazinggrace Iruoma";
+
+    private bool _open;
+
+    private void Toggle() => _open = !_open;
+    private void Close() => _open = false;
+
+    protected override void OnInitialized() => Nav.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _open = false;
+        StateHasChanged();
+    }
+
+    public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
+}

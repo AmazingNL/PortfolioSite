@@ -1,0 +1,11 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <NavMenu />
+    <main>
+        @Body
+    </main>
+    <footer class="site-footer">
+        <span>© @DateTime.Now.Year · Built with Blazor WebAssembly &amp; Supabase</span>
+    </footer>
+</div>

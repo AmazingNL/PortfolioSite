@@ -1,0 +1,102 @@
+@inject PortfolioDataService Data
+
+<section id="contact" class="section contact">
+    <p class="eyebrow">Get in touch</p>
+    <h2 class="section-title">Contact</h2>
+    <p class="section-subtitle">Have a question or an opportunity? Send me a message.</p>
+
+    @if (_sent)
+    {
+        <div class="notice success-notice">✅ Thanks, @_model.Name.Split(' ').FirstOrDefault()! Your message was sent.</div>
+    }
+    else
+    {
+        <EditForm Model="_model" OnValidSubmit="SubmitAsync" class="contact-form">
+            <DataAnnotationsValidator />
+
+            <div class="field">
+                <label>Name</label>
+                <InputText @bind-Value="_model.Name" placeholder="Your name" />
+                <ValidationMessage For="() => _model.Name" />
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <InputText @bind-Value="_model.Email" placeholder="you@example.com" />
+                <ValidationMessage For="() => _model.Email" />
+            </div>
+
+            <div class="field">
+                <label>Message</label>
+                <InputTextArea @bind-Value="_model.Message" rows="5" placeholder="Write your message…" />
+                <ValidationMessage For="() => _model.Message" />
+            </div>
+
+            @if (_error is not null)
+            {
+                <div class="notice" style="border-left-color: var(--danger); margin-bottom:1rem;">@_error</div>
+            }
+
+            <button type="submit" class="btn btn-primary" disabled="@_sending">
+                @(_sending ? "Sending…" : "Send message")
+            </button>
+
+            @if (!Data.IsConfigured)
+            {
+                <p class="muted hint">Note: Supabase isn't connected yet, so messages can't be saved. Add your keys to <code>appsettings.json</code>.</p>
+            }
+        </EditForm>
+    }
+</section>
+
+@code {
+    private ContactForm _model = new();
+    private bool _sending;
+    private bool _sent;
+    private string? _error;
+
+    private async Task SubmitAsync()
+    {
+        _error = null;
+
+        if (!Data.IsConfigured)
+        {
+            _error = "Messaging isn't available until Supabase is configured.";
+            return;
+        }
+
+        _sending = true;
+        try
+        {
+            await Data.SendMessageAsync(new ContactMessage
+            {
+                Name = _model.Name,
+                Email = _model.Email,
+                Message = _model.Message
+            });
+            _sent = true;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Couldn't send your message: {ex.Message}";
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+
+    private class ContactForm
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string Email { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(5, ErrorMessage = "Please write a little more.")]
+        public string Message { get; set; } = "";
+    }
+}

@@ -1,0 +1,222 @@
+@page "/admin"
+@inject AuthService Auth
+@inject PortfolioDataService Data
+
+<PageTitle>Admin · Portfolio</PageTitle>
+
+<div class="section admin">
+    @if (!Auth.IsConfigured)
+    {
+        <h2 class="section-title">Admin</h2>
+        <div class="notice">
+            Supabase isn't configured yet. Add your project <code>Url</code> and <code>AnonKey</code>
+            to <code>wwwroot/appsettings.json</code>, create an admin user in the Supabase dashboard
+            (Authentication → Users), then come back here to log in.
+        </div>
+    }
+    else if (!Auth.IsSignedIn)
+    {
+        <h2 class="section-title">Admin login</h2>
+        <p class="section-subtitle">Sign in with your Supabase account to manage content.</p>
+
+        <EditForm Model="_login" OnValidSubmit="SignInAsync" class="login-form">
+            <div class="field">
+                <label>Email</label>
+                <InputText @bind-Value="_login.Email" />
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <InputText type="password" @bind-Value="_login.Password" />
+            </div>
+            @if (_loginError is not null)
+            {
+                <div class="notice" style="border-left-color: var(--danger); margin-bottom: 1rem;">@_loginError</div>
+            }
+            <button type="submit" class="btn btn-primary" disabled="@_busy">@(_busy ? "Signing in…" : "Sign in")</button>
+        </EditForm>
+    }
+    else
+    {
+        <div class="admin-head">
+            <div>
+                <h2 class="section-title">Admin</h2>
+                <p class="muted">Signed in as @Auth.CurrentEmail</p>
+            </div>
+            <button class="btn" @onclick="SignOutAsync">Sign out</button>
+        </div>
+
+        <div class="tabs">
+            @foreach (var t in _tabs)
+            {
+                <button class="tab @(_tab == t ? "active" : "")" @onclick="() => _tab = t">@t</button>
+            }
+        </div>
+
+        @if (_tab == "Profile")
+        {
+            <EditForm Model="_profile" OnValidSubmit="SaveProfileAsync" class="editor">
+                <div class="field"><label>Full name</label><InputText @bind-Value="_profile.FullName" /></div>
+                <div class="field"><label>Headline</label><InputText @bind-Value="_profile.Headline" /></div>
+                <div class="field"><label>Bio</label><InputTextArea rows="4" @bind-Value="_profile.Bio" /></div>
+                <div class="field"><label>Location</label><InputText @bind-Value="_profile.Location" /></div>
+                <div class="field"><label>Email</label><InputText @bind-Value="_profile.Email" /></div>
+                <div class="field"><label>GitHub URL</label><InputText @bind-Value="_profile.GitHubUrl" /></div>
+                <div class="field"><label>LinkedIn URL</label><InputText @bind-Value="_profile.LinkedInUrl" /></div>
+                <div class="field"><label>Avatar URL</label><InputText @bind-Value="_profile.AvatarUrl" /></div>
+                <button type="submit" class="btn btn-primary">Save profile</button>
+            </EditForm>
+        }
+        else if (_tab == "Skills")
+        {
+            <div class="row-list">
+                @foreach (var s in _skills)
+                {
+                    <div class="row-item">
+                        <input class="inp" @bind="s.Name" placeholder="Name" />
+                        <input class="inp" @bind="s.Category" placeholder="Category" />
+                        <input class="inp narrow" type="number" min="1" max="5" @bind="s.Level" />
+                        <button class="btn" @onclick="() => SaveSkillAsync(s)">Save</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteSkillAsync(s)">✕</button>
+                    </div>
+                }
+            </div>
+            <button class="btn" @onclick="@(() => _skills.Add(new Skill { SortOrder = _skills.Count }))">+ Add skill</button>
+        }
+        else if (_tab == "Upcoming")
+        {
+            <div class="row-list">
+                @foreach (var p in _upcoming)
+                {
+                    <div class="card editor-card">
+                        <div class="field"><label>Title</label><input class="inp" @bind="p.Title" /></div>
+                        <div class="field"><label>Description</label><textarea class="inp" rows="2" @bind="p.Description"></textarea></div>
+                        <div class="two-col">
+                            <div class="field"><label>Status</label>
+                                <select class="inp" @bind="p.Status">
+                                    <option>Planned</option>
+                                    <option>In progress</option>
+                                    <option>Researching</option>
+                                </select>
+                            </div>
+                            <div class="field"><label>Target date</label><input class="inp" @bind="p.TargetDate" placeholder="e.g. Q3 2026" /></div>
+                        </div>
+                        <div class="row-actions">
+                            <button class="btn btn-primary" @onclick="() => SaveUpcomingAsync(p)">Save</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteUpcomingAsync(p)">Delete</button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <button class="btn" @onclick="@(() => _upcoming.Add(new UpcomingProject { SortOrder = _upcoming.Count }))">+ Add project</button>
+        }
+        else if (_tab == "Messages")
+        {
+            @if (_messages.Count == 0)
+            {
+                <p class="muted">No messages yet.</p>
+            }
+            else
+            {
+                @foreach (var m in _messages)
+                {
+                    <div class="card msg">
+                        <div class="msg-head">
+                            <strong>@m.Name</strong>
+                            <a href="mailto:@m.Email">@m.Email</a>
+                            <span class="muted">@(m.CreatedAt?.ToString("g"))</span>
+                        </div>
+                        <p>@m.Message</p>
+                    </div>
+                }
+            }
+        }
+
+        @if (_status is not null)
+        {
+            <p class="save-status">@_status</p>
+        }
+    }
+</div>
+
+@code {
+    private readonly string[] _tabs = { "Profile", "Skills", "Upcoming", "Messages" };
+    private string _tab = "Profile";
+
+    private LoginModel _login = new();
+    private string? _loginError;
+    private bool _busy;
+
+    private Profile _profile = new();
+    private List<Skill> _skills = new();
+    private List<UpcomingProject> _upcoming = new();
+    private List<ContactMessage> _messages = new();
+    private string? _status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.IsConfigured && Auth.IsSignedIn)
+            await LoadAllAsync();
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _profile = await Data.GetProfileAsync() ?? new Profile { Id = 1 };
+        if (_profile.Id == 0) _profile.Id = 1;
+        _skills = await Data.GetSkillsAsync();
+        _upcoming = await Data.GetUpcomingProjectsAsync();
+        _messages = await Data.GetMessagesAsync();
+    }
+
+    private async Task SignInAsync()
+    {
+        _busy = true;
+        _loginError = await Auth.SignInAsync(_login.Email, _login.Password);
+        _busy = false;
+        if (_loginError is null)
+            await LoadAllAsync();
+    }
+
+    private async Task SignOutAsync() => await Auth.SignOutAsync();
+
+    private async Task SaveProfileAsync()
+    {
+        await Data.UpsertProfileAsync(_profile);
+        Flash("Profile saved.");
+    }
+
+    private async Task SaveSkillAsync(Skill s)
+    {
+        await Data.SaveSkillAsync(s);
+        _skills = await Data.GetSkillsAsync();
+        Flash("Skill saved.");
+    }
+
+    private async Task DeleteSkillAsync(Skill s)
+    {
+        if (s.Id != 0) await Data.DeleteSkillAsync(s);
+        _skills.Remove(s);
+        Flash("Skill removed.");
+    }
+
+    private async Task SaveUpcomingAsync(UpcomingProject p)
+    {
+        await Data.SaveUpcomingProjectAsync(p);
+        _upcoming = await Data.GetUpcomingProjectsAsync();
+        Flash("Project saved.");
+    }
+
+    private async Task DeleteUpcomingAsync(UpcomingProject p)
+    {
+        if (p.Id != 0) await Data.DeleteUpcomingProjectAsync(p);
+        _upcoming.Remove(p);
+        Flash("Project removed.");
+    }
+
+    private void Flash(string msg) => _status = msg;
+
+    private class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}
