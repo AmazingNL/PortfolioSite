@@ -3,6 +3,17 @@
 ###############################################################################
 * text=auto
 
+# Blazor WASM binary assets — must NOT have line endings normalized
+*.wasm binary
+*.wasm.br binary
+*.wasm.gz binary
+*.dll binary
+*.dll.br binary
+*.dll.gz binary
+*.br binary
+*.gz binary
+*.dat binary
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
